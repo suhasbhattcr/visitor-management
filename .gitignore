@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment — never commit secrets
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+**/dist/
+build/
+**/build/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+
+# Vite cache
+.vite/
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+
+# Editor / IDE — user-specific
+.idea/
+
+# Legacy source (superseded by gatepass-api/)
+api-gateway/
