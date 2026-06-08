@@ -111,6 +111,7 @@ export function ResidentAppProvider({ unit, residentName, residentUserId, childr
   const pathnameRef = useRef(location.pathname);
   const activeThreadRef = useRef(null);
   const typingTimeoutRef = useRef({});
+  const hasConnectedRef = useRef(false);
 
   const [connected, setConnected] = useState(false);
   const [deliveries, setDeliveries] = useState([]);
@@ -154,8 +155,8 @@ export function ResidentAppProvider({ unit, residentName, residentUserId, childr
       });
   }, []);
 
-  async function loadDeliveries() {
-    setIsLoading(true);
+  async function loadDeliveries({ withLoading = true } = {}) {
+    if (withLoading) setIsLoading(true);
     setLoadError("");
 
     try {
@@ -164,7 +165,7 @@ export function ResidentAppProvider({ unit, residentName, residentUserId, childr
     } catch (error) {
       setLoadError(error.message || "Unable to load deliveries for this unit");
     } finally {
-      setIsLoading(false);
+      if (withLoading) setIsLoading(false);
     }
   }
 
@@ -188,7 +189,13 @@ export function ResidentAppProvider({ unit, residentName, residentUserId, childr
     const socket = createSocket({ role: "resident", unit, residentName: residentName || null, residentUserId: residentUserId || null });
     socketRef.current = socket;
 
-    socket.on("connect", () => setConnected(true));
+    socket.on("connect", () => {
+      setConnected(true);
+      if (hasConnectedRef.current) {
+        loadDeliveries({ withLoading: false });
+      }
+      hasConnectedRef.current = true;
+    });
     socket.on("disconnect", () => setConnected(false));
 
     socket.on("delivery:event", (event) => {

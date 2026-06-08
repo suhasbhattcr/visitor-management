@@ -65,6 +65,7 @@ export function SecurityAppProvider({ children, onLogout, persona }) {
   const typingTimeouts = useRef({});
   const pathnameRef = useRef(location.pathname);
   const activeThreadRef = useRef(null);
+  const hasConnectedRef = useRef(false);
 
   const [gate, setGate] = useState(() => persona?.gate || localStorage.getItem(GATE_STORAGE_KEY) || "");
   const [officerName, setOfficerName] = useState(() => persona?.name || localStorage.getItem(OFFICER_STORAGE_KEY) || "");
@@ -137,7 +138,13 @@ export function SecurityAppProvider({ children, onLogout, persona }) {
   useEffect(() => {
     const socket = createSocket({ role: "security", officerId, officerName, gate });
     socketRef.current = socket;
-    socket.on("connect", () => setConnected(true));
+    socket.on("connect", () => {
+      setConnected(true);
+      if (hasConnectedRef.current) {
+        loadDeliveries({ withLoading: false });
+      }
+      hasConnectedRef.current = true;
+    });
     socket.on("disconnect", () => setConnected(false));
 
     socket.on("delivery:event", (event) => {
